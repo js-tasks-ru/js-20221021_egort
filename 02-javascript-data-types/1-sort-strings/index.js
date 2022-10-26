@@ -9,13 +9,13 @@ export function sortStrings(arr, param = 'asc') {
     let newArr = arr.map(a => a);
     // sorting with correct compare strings and rule for upper case
     newArr.sort((a, b) => {
-        if (a.toLowerCase() !== b.toLowerCase()) {
-            return a.localeCompare(b);
-        } else {
+        if (a.toLowerCase() === b.toLowerCase()) {
             return b.localeCompare(a);
+        } else {
+            return param === 'asc' ? a.localeCompare(b) : b.localeCompare(a);
         }
     });
-    // return array sorted by option asc/desc
-    return param === 'asc' ? newArr : newArr.reverse();
+
+    return newArr;
 
 }
