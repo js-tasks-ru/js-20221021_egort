@@ -10,8 +10,8 @@ export function sortStrings(arr, param = 'asc') {
     // sorting with correct compare strings and rule for upper case
     newArr.sort((a, b) => {
         return param === 'asc' ?
-            a.localeCompare(b, [], { caseFirst: "upper" }) :
-            b.localeCompare(a, [], { caseFirst: "upper" });
+            a.localeCompare(b, ['ru', 'en'], { caseFirst: "upper" }) :
+            b.localeCompare(a, ['ru', 'en'], { caseFirst: "upper" });
     });
 
     return newArr;
