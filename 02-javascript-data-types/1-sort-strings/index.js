@@ -9,11 +9,9 @@ export function sortStrings(arr, param = 'asc') {
     let newArr = arr.map(a => a);
     // sorting with correct compare strings and rule for upper case
     newArr.sort((a, b) => {
-        if (a.toLowerCase() === b.toLowerCase()) {
-            return b.localeCompare(a);
-        } else {
-            return param === 'asc' ? a.localeCompare(b) : b.localeCompare(a);
-        }
+        return param === 'asc' ?
+            a.localeCompare(b, [], { caseFirst: "upper" }) :
+            b.localeCompare(a, [], { caseFirst: "upper" });
     });
 
     return newArr;
