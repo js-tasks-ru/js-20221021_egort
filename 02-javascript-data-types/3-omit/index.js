@@ -5,5 +5,11 @@
  * @returns {object} - returns the new object
  */
 export const omit = (obj, ...fields) => {
+    const newObj = {};
+    Object.assign(newObj, obj);
 
+    for (let field of fields) {
+        delete newObj[field];
+    }
+    return newObj;
 };
