@@ -6,21 +6,24 @@
  */
 export function sortStrings(arr, param = 'asc') {
     // new array which will be sorted
-    const newArr = arr.slice(); // replaced method map() by slice() for copy array // replaced let by const because array is an object
+    const newArr = [...arr]; // replaced by spread operator
     // sorting with correct compare strings and rule for upper case
     newArr.sort((a, b) => {
-        return param === 'asc' ?
-            localeCompareRuEnUpperFirst(a, b) :
-            localeCompareRuEnUpperFirst(b, a); // replaced localeCompare() with parameters by new function 
+        if (param === 'asc') {
+            return localeCompareRuEnUpperFirst(a, b);
+        } else if (param === 'desc') {
+            return localeCompareRuEnUpperFirst(b, a);
+        } else {
+            throw "there is not this sort order.";
+        }
     });
 
     return newArr;
-
 }
 
 /**
  * localeCompareRuEnUpperFirst - localeCompare with locales = ['ru', 'en'] and with options = caseFirst: "upper"
- * @param {string} a - frist string for compare
+ * @param {string} a - first string for compare
  * @param {string} b - second string for compare
  * @returns {number}
  */
