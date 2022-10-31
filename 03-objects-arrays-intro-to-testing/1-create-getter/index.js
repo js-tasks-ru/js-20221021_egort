@@ -8,20 +8,17 @@ export function createGetter(path) {
     if (path === '' || typeof (path) !== 'string') {
         return;
     }
-    // array with step properties is reversed for optimized
-    const arrayPath = path.split('.').reverse();
-    const numStepProperty = arrayPath.length;
+
+    const arrayPath = path.split('.');
 
     return function getter(obj) {
-        let nameCurrentProperty = arrayPath.pop();
         let currentObj = obj;
-        for (let i = 0; i < numStepProperty; i++) {
-            if (Object.hasOwn(currentObj, nameCurrentProperty)) {
-                currentObj = currentObj[nameCurrentProperty];
+        for (let i = 0; i < arrayPath.length; i++) {
+            if (Object.hasOwn(currentObj, arrayPath[i])) {
+                currentObj = currentObj[arrayPath[i]];
             } else {
                 return;
             }
-            nameCurrentProperty = arrayPath.pop();
         }
         return currentObj;
     }
