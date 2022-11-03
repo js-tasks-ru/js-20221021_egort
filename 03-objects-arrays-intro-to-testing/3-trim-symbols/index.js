@@ -5,15 +5,15 @@
  * @returns {string} - the new string without extra symbols according passed size
  */
 export function trimSymbols(string, size) {
-    let tempString = '';
-    let newString = '';
-
     if (size === 0) {
         return '';
     }
     if (size === undefined) {
         return string;
     }
+
+    let tempString = '';
+    let newString = '';
 
     for (const symb of string) {
         if (tempString.length === 0) { // если строка пустая то записываем в нее символ
