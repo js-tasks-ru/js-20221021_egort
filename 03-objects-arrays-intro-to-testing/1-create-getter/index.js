@@ -13,9 +13,9 @@ export function createGetter(path) {
 
     return function getter(obj) {
         let currentObj = obj;
-        for (let i = 0; i < arrayPath.length; i++) {
-            if (Object.hasOwn(currentObj, arrayPath[i])) {
-                currentObj = currentObj[arrayPath[i]];
+        for (const arrayPathElem of arrayPath) {
+            if (Object.hasOwn(currentObj, arrayPathElem)) {
+                currentObj = currentObj[arrayPathElem];
             } else {
                 return;
             }
