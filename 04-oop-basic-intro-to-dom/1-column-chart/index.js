@@ -31,30 +31,42 @@ export default class ColumnChart {
     this.element = element.firstElementChild;
     // 0 если данных нет
     if (!this.chart) {
-      this.element.className += ' column-chart_loading';
+      this.renderNoData();
     } else {
       // 1 вставить title
-      if (this.chart.label) {
-        this.element.querySelector('.column-chart__title').textContent = this.chart.label;
-      }
+      this.renderTitle();
       // 2 вставить линку
-      if (this.chart.link) {
-        const elementLink = document.createElement('a');
-        elementLink.href = this.chart.link;
-        elementLink.className += 'column-chart__link';
-        elementLink.textContent = 'View all';
-        this.element.querySelector('.column-chart__title').firstChild.after(elementLink);
-      }
+      this.renderLink();
       // 3 вставить значение хедера
-      if (this.chart.value) {
-        this.element.querySelector('.column-chart__header').textContent = this.chart.formatHeading ?
-          this.chart.formatHeading(this.chart.value) :
-          this.chart.value;
-      }
+      this.renderHeader();
       // 4 вставить html в тело
       this.renderData();
     }
 
+  }
+
+  renderTitle() {
+    if (this.chart.label) {
+      this.element.querySelector('.column-chart__title').textContent = this.chart.label;
+    }
+  }
+
+  renderLink() {
+    if (this.chart.link) {
+      const elementLink = document.createElement('a');
+      elementLink.href = this.chart.link;
+      elementLink.className += 'column-chart__link';
+      elementLink.textContent = 'View all';
+      this.element.querySelector('.column-chart__title').firstChild.after(elementLink);
+    }
+  }
+
+  renderHeader() {
+    if (this.chart.value) {
+      this.element.querySelector('.column-chart__header').textContent = this.chart.formatHeading ?
+        this.chart.formatHeading(this.chart.value) :
+        this.chart.value;
+    }
   }
 
   renderData() {
@@ -70,8 +82,12 @@ export default class ColumnChart {
         this.element.querySelector('.column-chart__chart').append(elementColumnData);
       }
     } else {
-      this.element.className += ' column-chart_loading';
+      this.renderNoData();
     }
+  }
+
+  renderNoData() {
+    this.element.className += ' column-chart_loading';
   }
 
   getColumnProps(data) {
