@@ -4,7 +4,7 @@ export default class ColumnChart {
     this.chartHeight = 50;
 
     this.render();
-    this.initEventListeners();
+    //this.initEventListeners();
   }
 
   getTemplate() {
@@ -92,7 +92,7 @@ export default class ColumnChart {
 
   getColumnProps(data) {
     const maxValue = Math.max(...data);
-    const scale = 50 / maxValue;
+    const scale = this.chartHeight / maxValue;
 
     return data.map(item => {
       return {
@@ -102,9 +102,9 @@ export default class ColumnChart {
     });
   }
 
-  initEventListeners() {
-    // NOTE: в данном методе добавляем обработчики событий, если они есть
-  }
+  // initEventListeners() {
+  //   // NOTE: в данном методе добавляем обработчики событий, если они есть
+  // }
 
   remove() {
     this.element.remove();
@@ -118,10 +118,7 @@ export default class ColumnChart {
   update(newData) {
     // Компонент должен иметь метод update
     // с помощью которого можно передать другой массив данных для отображения колонок чарта
-    const container = this.element.querySelector('.column-chart__chart'); // хотел для удаления использовать replacedChildren() но тесты не пропускают
-    while (container.firstChild) {
-      container.removeChild(container.firstChild);
-    }
+    this.element.querySelector('.column-chart__chart').innerHTML = '';
     this.chart.data = newData;
     this.renderData();
   }
