@@ -1,6 +1,15 @@
 export default class ColumnChart {
-  constructor(chart) {
-    this.chart = chart;
+  constructor({
+    label = '',
+    link = '',
+    data = [],
+    formatHeading = data => data,
+    value = 0,
+  } = {}) {
+    this.label = label;
+    this.link = link;
+    this.value = formatHeading(value);
+    this.data = data;
     this.chartHeight = 50;
 
     this.render();
@@ -11,10 +20,10 @@ export default class ColumnChart {
     return `
             <div class="column-chart" style="--chart-height: ${this.chartHeight}">
               <div class="column-chart__title">
-                Default_title
+              ${this.label}
               </div>
               <div class="column-chart__container">
-                <div data-element="header" class="column-chart__header">0</div>
+                <div data-element="header" class="column-chart__header">${this.value}</div>
                 <div data-element="body" class="column-chart__chart">
                 </div>
               </div>
@@ -29,65 +38,40 @@ export default class ColumnChart {
     // NOTE: в этой строке мы избавляемся от обертки-пустышки в виде `div`
     // который мы создали на строке (*)
     this.element = element.firstElementChild;
-    // 0 если данных нет
-    if (!this.chart) {
-      this.renderNoData();
-    } else {
-      // 1 вставить title
-      this.renderTitle();
-      // 2 вставить линку
-      this.renderLink();
-      // 3 вставить значение хедера
-      this.renderHeader();
-      // 4 вставить html в тело
-      this.renderData();
-    }
 
-  }
+    // 1 вставить линку
+    this.renderLink();
+    // 2 вставить html в тело
+    this.renderData();
 
-  renderTitle() {
-    if (this.chart.label) {
-      this.element.querySelector('.column-chart__title').textContent = this.chart.label;
-    }
   }
 
   renderLink() {
-    if (this.chart.link) {
+    if (this.link) {
       const elementLink = document.createElement('a');
-      elementLink.href = this.chart.link;
-      elementLink.className += 'column-chart__link';
+      elementLink.href = this.link;
+      elementLink.classList.add('column-chart__link');
       elementLink.textContent = 'View all';
-      this.element.querySelector('.column-chart__title').firstChild.after(elementLink);
-    }
-  }
-
-  renderHeader() {
-    if (this.chart.value) {
-      this.element.querySelector('.column-chart__header').textContent = this.chart.formatHeading ?
-        this.chart.formatHeading(this.chart.value) :
-        this.chart.value;
+      this.element.querySelector('.column-chart__title').append(elementLink);
     }
   }
 
   renderData() {
-    if (this.chart.data && this.chart.data.length > 0) {
-      const arrayColumnPropsData = this.getColumnProps(this.chart.data);
+    if (this.data.length) {
+      const arrayColumnPropsData = this.getColumnProps(this.data);
 
-      let elementColumnData;
+      const columnDataHTML = arrayColumnPropsData.map( item => {
+        return `<div style="--value: ${item.value}" data-tooltip="${item.percent}"></div>`;
+      }).join('');
+      this.element.querySelector('.column-chart__chart').innerHTML = columnDataHTML;
 
-      for (const columnPropsData of arrayColumnPropsData) {
-        elementColumnData = document.createElement('div');
-        elementColumnData.style = '--value: ' + columnPropsData.value;
-        elementColumnData.setAttribute('data-tooltip', columnPropsData.percent);
-        this.element.querySelector('.column-chart__chart').append(elementColumnData);
-      }
     } else {
       this.renderNoData();
     }
   }
 
   renderNoData() {
-    this.element.className += ' column-chart_loading';
+    this.element.classList.add('column-chart_loading');
   }
 
   getColumnProps(data) {
@@ -119,7 +103,7 @@ export default class ColumnChart {
     // Компонент должен иметь метод update
     // с помощью которого можно передать другой массив данных для отображения колонок чарта
     this.element.querySelector('.column-chart__chart').innerHTML = '';
-    this.chart.data = newData;
+    this.data = newData;
     this.renderData();
   }
 }
