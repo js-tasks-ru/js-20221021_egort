@@ -43,7 +43,7 @@ export default class NotificationMessage {
             NotificationMessage.currentElement.remove();
         }
 
-        NotificationMessage.currentElement = this.element;
+        NotificationMessage.currentElement = this;
 
         element.append(this.element);
 
@@ -51,11 +51,15 @@ export default class NotificationMessage {
     }
 
     remove() {
-        this.element.remove();
+        if (this.element) {
+            this.element.remove();
+        }
     }
 
     destroy() {
         this.remove();
         // NOTE: удаляем обработчики событий, если они есть
+        this.element = null;
+        this.subElements = {};
     }
 }
