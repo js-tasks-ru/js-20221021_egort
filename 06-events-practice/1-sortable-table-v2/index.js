@@ -107,6 +107,14 @@ export default class SortableTable {
   }
 
   sort(field, direction = 'asc') {
+    if (this.isSortLocally) {
+      this.sortOnClient(field, direction);
+    } else {
+      this.sortOnServer();
+    }
+  }
+
+  sortOnClient(field, direction = 'asc') {
     let funcCompare;
 
     if (this.headerConfig.find(obj => obj.id === field).sortable === false) return;
