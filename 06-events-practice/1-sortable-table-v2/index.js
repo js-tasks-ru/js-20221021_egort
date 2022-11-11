@@ -119,12 +119,20 @@ export default class SortableTable {
 
     if (this.headerConfig.find(obj => obj.id === field).sortable === false) return;
     const sortType = this.headerConfig.find(obj => obj.id === field).sortType;
+    const customSorting = this.headerConfig.find(obj => obj.id === field).sortType;
 
-    if (sortType === 'number') {
-      funcCompare = compareNumber;
-    }
-    if (sortType === 'string') {
-      funcCompare = localeCompareRuEnUpperFirst;
+    switch (sortType) {
+      case 'number':
+        funcCompare = compareNumber;
+        break;
+      case 'string':
+        funcCompare = localeCompareRuEnUpperFirst;
+        break;
+      case 'custom':
+        funcCompare = customSorting;
+        break;
+      default:
+        throw new Error(`There is not this sort type ${sortType}`);
     }
 
     this.data.sort((a, b) => {
