@@ -119,7 +119,7 @@ export default class SortableTable {
 
     if (this.headerConfig.find(obj => obj.id === field).sortable === false) return;
     const sortType = this.headerConfig.find(obj => obj.id === field).sortType;
-    const customSorting = this.headerConfig.find(obj => obj.id === field).sortType;
+    const customSorting = this.headerConfig.find(obj => obj.id === field).customSorting;
 
     switch (sortType) {
       case 'number':
