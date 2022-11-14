@@ -44,15 +44,15 @@ export default class SortableTable {
       .map(item => {
         return `<a href="/products/${item.id}" class="sortable-table__row">
                   ${this.headerConfig
-                    .map(column => {
-                      if(column.template){
-                        return column.template(item[column.id]);
-                      } else {
-                        return `<div class="sortable-table__cell">${item[column.id]}</div>`;
-                      }
-                    })
-                    .join("")
-                  }</a>`
+            .map(column => {
+              if (column.template) {
+                return column.template(item[column.id]);
+              } else {
+                return `<div class="sortable-table__cell">${item[column.id]}</div>`;
+              }
+            })
+            .join("")
+          }</a>`
       })
       .join("");
   }
@@ -77,18 +77,22 @@ export default class SortableTable {
   }
 
   remove() {
-    this.element.remove();
+    if (this.element) {
+      this.element.remove();
+    }
   }
 
   destroy() {
     this.remove();
     // NOTE: удаляем обработчики событий, если они есть
+    this.element = null;
+    this.subElements = {};
   }
 
   sort(field, direction = 'asc') {
     let funcCompare;
     const sortType = this.headerConfig.find(obj => obj.id === field).sortType;
-    
+
     if (sortType === 'number') {
       funcCompare = compareNumber;
     }
@@ -110,7 +114,7 @@ export default class SortableTable {
     this.subElements.header.querySelectorAll('[data-order]').forEach(element => {
       element.removeAttribute('data-order');
     });
-    this.subElements.header.querySelector('[data-id="'+field+'"]').setAttribute('data-order', direction);
+    this.subElements.header.querySelector('[data-id="' + field + '"]').setAttribute('data-order', direction);
 
     function localeCompareRuEnUpperFirst(a, b) {
       return a.localeCompare(b, ['ru', 'en'], { caseFirst: "upper" });

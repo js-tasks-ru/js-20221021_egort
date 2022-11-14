@@ -38,27 +38,28 @@ export default class NotificationMessage {
         this.element = element.firstElementChild;
     }
 
-    show(element) {
+    show(element = document.body) {
         if (NotificationMessage.currentElement) {
             NotificationMessage.currentElement.remove();
         }
 
-        NotificationMessage.currentElement = this.element;
+        NotificationMessage.currentElement = this;
 
-        if (element) {
-            element.append(this.element);
-        } else {
-            document.body.append(this.element);
-        }
-        setTimeout(this.remove.bind(this), this.duration);
+        element.append(this.element);
+
+        setTimeout(() => this.remove(), this.duration);
     }
 
     remove() {
-        this.element.remove();
+        if (this.element) {
+            this.element.remove();
+        }
     }
 
     destroy() {
         this.remove();
         // NOTE: удаляем обработчики событий, если они есть
+        this.element = null;
+        this.subElements = {};
     }
 }
