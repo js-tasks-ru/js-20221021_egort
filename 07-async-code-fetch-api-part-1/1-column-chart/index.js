@@ -102,18 +102,17 @@ export default class ColumnChart {
         this.remove();
     }
 
-    async update(from = this.range.from, to = this.range.to) {
+    update(from = this.range.from, to = this.range.to) {
         if (from) this.url.searchParams.set('from', from);
         if (to) this.url.searchParams.set('to', to);
 
-        await fetchJson(this.url)
+        return fetchJson(this.url)
             .then(data => {
                 this.data = data;
                 this.renderData();
+                return data;
             })
             .catch(error => console.error('Something went wrong: ' + error));
-
-        return this.data;
     }
 
     getSubElements() {

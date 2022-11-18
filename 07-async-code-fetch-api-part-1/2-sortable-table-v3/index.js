@@ -19,6 +19,7 @@ export default class SortableTable {
       start: 0,
       end: this.loadRange,
     }
+    this.isLoading = false;
 
     this.render();
   }
@@ -103,8 +104,6 @@ export default class SortableTable {
 
   renderData() {
     this.subElements.body.innerHTML = this.getColumnBody();
-    //   element.removeAttribute('data-order');
-    // });
   }
 
   initEventListener() {
@@ -201,7 +200,7 @@ export default class SortableTable {
     return this.data;
   }
 
-  async loadData() {
+  loadData() {
     this.url.searchParams.set('_start', this.params.start);
     this.url.searchParams.set('_end', this.params.end);
 
@@ -214,8 +213,9 @@ export default class SortableTable {
   }
 
   async populate() {
-    let windowRelativeBottom = document.documentElement.getBoundingClientRect().bottom;
-    if (windowRelativeBottom < document.documentElement.clientHeight + 1) {
+    const windowRelativeBottom = document.documentElement.getBoundingClientRect().bottom;
+    if (windowRelativeBottom < document.documentElement.clientHeight + 300 && this.isLoading === false) {
+      this.isLoading = true;
       this.params.start += this.loadRange;
       this.params.end += this.loadRange;
       this.url.searchParams.set('_start', this.params.start);
@@ -227,6 +227,7 @@ export default class SortableTable {
         .then(data => {
           this.data = this.data.concat(data);
           this.renderData();
+          this.isLoading = false;
         })
         .catch(error => console.error('Something went wrong: ' + error));
     }
