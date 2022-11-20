@@ -214,7 +214,7 @@ export default class SortableTable {
 
   async populate() {
     const windowRelativeBottom = document.documentElement.getBoundingClientRect().bottom;
-    if (windowRelativeBottom < document.documentElement.clientHeight + 300 && this.isLoading === false) {
+    if (windowRelativeBottom < document.documentElement.clientHeight + 300 && !this.isLoading && !this.isSortLocally) {
       this.isLoading = true;
       this.params.start += this.loadRange;
       this.params.end += this.loadRange;
