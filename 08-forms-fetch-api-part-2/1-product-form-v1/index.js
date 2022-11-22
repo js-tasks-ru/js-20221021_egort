@@ -5,12 +5,22 @@ const IMGUR_CLIENT_ID = '28aaa2e823b03b1';
 const BACKEND_URL = 'https://course-js.javascript.ru';
 
 export default class ProductForm {
-  save = (event) => {
-    const nameCustomEvent = this.isNewProduct ? 'product-saved' : 'product-updated';
-    this.element.dispatchEvent(new CustomEvent(nameCustomEvent, {
-      bubbles: true
-    }));
-  }
+  defaultFormData = {
+    title: '',
+    description: '',
+    quantity: 1,
+    subcategory: '',
+    status: 1,
+    images: [],
+    price: 100,
+    discount: 0,
+  };
+
+  onSubmit = event => {
+    event.preventDefault();
+
+    this.save();
+  };
 
   constructor(productId) {
     this.productId = productId;
@@ -36,9 +46,6 @@ export default class ProductForm {
     this.loadData();
 
     this.initEventListener();
-
-    this.subElements.productForm.action = this.urlProduct.href;
-    this.subElements.productForm.method = this.isNewProduct ? 'PUT' : 'PATCH';
 
     return this.element;
   }
@@ -114,21 +121,22 @@ export default class ProductForm {
   }
 
   async loadData() {
-    if (this.isNewProduct) {
-      this.resultCategory = await fetchJson(this.urlCategory);
-      this.subElements.productForm.elements.price.value = 100;
-      this.subElements.productForm.elements.discount.value = 0;
-      this.subElements.productForm.elements.quantity.value = 1;
-    } else {
-      [this.resultCategory, this.resultProduct] = await Promise.all([fetchJson(this.urlCategory), fetchJson(this.urlProductGet)]);
-    }
+    const resultCategoryPromise = fetchJson(this.urlCategory);
+    const resultProductPromise = this.isNewProduct
+      ? Promise.resolve([this.defaultFormData])
+      : fetchJson(this.urlProductGet);
+
+    const [resultCategory, resultProduct] = await Promise.all([resultCategoryPromise, resultProductPromise]);
+
+    this.resultProduct = resultProduct[0];
+    this.categories = resultCategory
 
     this.updateData();
   }
 
   updateData() {
-    if (this.resultCategory) {
-      for (const category of this.resultCategory) {
+    if (this.categories) {
+      for (const category of this.categories) {
         for (const subCategory of category.subcategories) {
           let newOption = new Option(`${category.title} > ${subCategory.title}`, subCategory.id);
           this.subElements.productForm.elements.subcategory.append(newOption);
@@ -137,13 +145,13 @@ export default class ProductForm {
     }
 
     if (this.resultProduct) {
-      this.subElements.productForm.elements.title.value = this.resultProduct[0].title;
-      this.subElements.productForm.elements.description.value = this.resultProduct[0].description;
-      this.subElements.productForm.elements.price.value = this.resultProduct[0].price;
-      this.subElements.productForm.elements.discount.value = this.resultProduct[0].discount;
-      this.subElements.productForm.elements.quantity.value = this.resultProduct[0].quantity;
-      this.subElements.productForm.elements.status.value = this.resultProduct[0].status;
-      this.subElements.productForm.elements.subcategory.value = this.resultProduct[0].subcategory;
+      this.subElements.productForm.elements.title.value = this.resultProduct.title;
+      this.subElements.productForm.elements.description.value = this.resultProduct.description;
+      this.subElements.productForm.elements.price.value = this.resultProduct.price;
+      this.subElements.productForm.elements.discount.value = this.resultProduct.discount;
+      this.subElements.productForm.elements.quantity.value = this.resultProduct.quantity;
+      this.subElements.productForm.elements.status.value = this.resultProduct.status;
+      this.subElements.productForm.elements.subcategory.value = this.resultProduct.subcategory;
       this.subElements.imageListContainer.innerHTML = this.loadImages();
     }
 
@@ -151,7 +159,7 @@ export default class ProductForm {
 
   loadImages() {
     return '<ul class="sortable-list">' +
-      this.resultProduct[0].images
+      this.resultProduct.images
         .map(item => {
           return `
           <li class="products-edit__imagelist-item sortable-list__item" style="">
@@ -173,7 +181,49 @@ export default class ProductForm {
   }
 
   initEventListener() {
-    this.subElements.productForm.addEventListener('submit', this.save);
+    this.subElements.productForm.addEventListener('submit', this.onSubmit);
+  }
+
+  async save() {
+    const product = this.getFormData();
+
+    try {
+      const result = await fetchJson(this.urlProduct, {
+        method: this.isNewProduct ? 'PUT' : 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(product),
+      });
+
+      this.dispatchEvent(result.id);
+    } catch (error) {
+      console.error('something went wrong', error);
+    }
+  }
+
+  getFormData() {
+    const product = {};
+
+    if (this.productId) product.id = this.productId;
+    product.title = this.subElements.productForm.elements.title.value;
+    product.description = this.subElements.productForm.elements.description.value;
+    product.price = Number(this.subElements.productForm.elements.price.value);
+    product.discount = Number(this.subElements.productForm.elements.discount.value);
+    product.quantity = Number(this.subElements.productForm.elements.quantity.value);
+    product.status = Number(this.subElements.productForm.elements.status.value);
+    product.subcategory = this.subElements.productForm.elements.subcategory.value;
+    product.images = this.resultProduct.images;
+
+    return product;
+  }
+
+  dispatchEvent(id) {
+    const event = this.isNewProduct
+      ? new CustomEvent('product-saved')
+      : new CustomEvent('product-updated', { detail: id });
+
+    this.element.dispatchEvent(event);
   }
 
   remove() {
