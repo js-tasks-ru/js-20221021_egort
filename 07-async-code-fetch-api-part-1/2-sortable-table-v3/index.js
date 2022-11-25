@@ -20,6 +20,7 @@ export default class SortableTable {
       end: this.loadRange,
     }
     this.isLoading = false;
+    this.scrollBorderY = 300;
 
     this.render();
   }
@@ -214,7 +215,7 @@ export default class SortableTable {
 
   async populate() {
     const windowRelativeBottom = document.documentElement.getBoundingClientRect().bottom;
-    if (windowRelativeBottom < document.documentElement.clientHeight + 300 && !this.isLoading && !this.isSortLocally) {
+    if (windowRelativeBottom < document.documentElement.clientHeight + this.scrollBorderY && !this.isLoading && !this.isSortLocally) {
       this.isLoading = true;
       this.params.start += this.loadRange;
       this.params.end += this.loadRange;
