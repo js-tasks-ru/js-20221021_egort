@@ -1,4 +1,4 @@
-//import SortableList from '../../2-sortable-list/src/index.js';
+import SortableList from '../2-sortable-list/index.js';
 import escapeHtml from './utils/escape-html.js';
 import fetchJson from './utils/fetch-json.js';
 
@@ -45,11 +45,7 @@ export default class ProductForm {
           referrer: ''
         });
 
-        let element = document.createElement("div");
-        element.innerHTML = this.getImageTemplate(result.data.link, file.name);
-        element = element.firstElementChild;
-
-        this.subElements.imageListContainer.firstElementChild.append(element);
+        this.subElements.imageListContainer.firstElementChild.append(this.getImageItem(result.data.link, file.name));
 
         elementInputFile.remove();
       }
@@ -188,36 +184,39 @@ export default class ProductForm {
       this.subElements.productForm.elements.quantity.value = this.resultProduct.quantity;
       this.subElements.productForm.elements.status.value = this.resultProduct.status;
       this.subElements.productForm.elements.subcategory.value = this.resultProduct.subcategory;
-      this.subElements.imageListContainer.innerHTML = this.loadImages();
+      this.loadImages();
     }
 
   }
 
-  getImageTemplate(url, source) {
-    return `
+  getImageItem(url, source) {
+    const wrapper = document.createElement('div');
+
+    wrapper.innerHTML = `
       <li class="products-edit__imagelist-item sortable-list__item" style="">
-        <input type="hidden" name="url" value="${url}">
-        <input type="hidden" name="source" value="${source}">
+        <input type="hidden" name="url" value="${escapeHtml(url)}">
+        <input type="hidden" name="source" value="${escapeHtml(source)}">
         <span>
           <img src="icon-grab.svg" data-grab-handle="" alt="grab">
-          <img class="sortable-table__cell-img" alt="${source}" src="${url}">
-          <span>${source}</span>
+          <img class="sortable-table__cell-img" alt="${escapeHtml(source)}" src="${escapeHtml(url)}">
+          <span>${escapeHtml(source)}</span>
         </span>
         <button type="button">
           <img src="icon-trash.svg" data-delete-handle="" alt="delete">
         </button>
       </li>
     `;
+
+    return wrapper.firstElementChild;
   }
 
   loadImages() {
-    return '<ul class="sortable-list">' +
-      this.resultProduct.images
-        .map(item => {
-          return this.getImageTemplate(item.url, item.source);
-        })
-        .join("") +
-      '</ul>';
+    const items = this.resultProduct.images
+      .map(({ url, source }) => this.getImageItem(url, source));
+
+    const sortableListImages = new SortableList({ items });
+
+    this.subElements.imageListContainer.append(sortableListImages.element);
   }
 
   initEventListener() {
