@@ -33,16 +33,16 @@ export default class Page {
             from: new Date(),
         };
         this.range.from.setMonth(this.range.from.getMonth() - this.monthRangeDefault);
-        this.rangePicker = new RangePicker(this.range);
+        const rangePicker = new RangePicker(this.range);
 
         this.orders = {
             label: 'orders',
             link: '/sales',
             formatHeading: data => data,
             url: 'api/dashboard/orders',
-            range: this.rangePicker.selected,
+            range: rangePicker.selected,
         };
-        this.columnChartOrders = new ColumnChart(this.orders);
+        const ordersChart = new ColumnChart(this.orders);
 
         this.sales = {
             label: 'sales',
@@ -50,23 +50,31 @@ export default class Page {
                 return '$' + data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
             },
             url: 'api/dashboard/sales',
-            range: this.rangePicker.selected,
+            range: rangePicker.selected,
         };
-        this.columnChartSales = new ColumnChart(this.sales);
+        const salesChart = new ColumnChart(this.sales);
 
         this.customers = {
             label: 'customers',
             formatHeading: data => data,
             url: 'api/dashboard/customers',
-            range: this.rangePicker.selected,
+            range: rangePicker.selected,
         }
-        this.columnChartCustomers = new ColumnChart(this.customers);
+        const customersChart = new ColumnChart(this.customers);
 
         this.bestSellers = {
-            url: `api/dashboard/bestsellers?from=${this.rangePicker.selected.from.toISOString()}&to=${this.rangePicker.selected.to.toISOString()}`,
+            url: `api/dashboard/bestsellers?from=${rangePicker.selected.from.toISOString()}&to=${rangePicker.selected.to.toISOString()}`,
             isSortLocally: true,
         };
-        this.sortableTableBestSellers = new SortableTable(header, this.bestSellers);
+        const sortableTable = new SortableTable(header, this.bestSellers);
+
+        this.components = {
+            sortableTable,
+            ordersChart,
+            salesChart,
+            customersChart,
+            rangePicker
+        };
     }
 
     async render() {
@@ -76,11 +84,12 @@ export default class Page {
 
         this.subElements = this.getSubElements();
 
-        this.subElements.rangePicker.append(this.rangePicker.element);
-        this.subElements.ordersChart.append(this.columnChartOrders.element);
-        this.subElements.salesChart.append(this.columnChartSales.element);
-        this.subElements.customersChart.append(this.columnChartCustomers.element);
-        this.subElements.sortableTable.append(this.sortableTableBestSellers.element);
+        Object.keys(this.components).forEach(componentName => {
+            const subElement = this.subElements[componentName];
+            const { element } = this.components[componentName];
+
+            subElement.append(element);
+        });
 
         this.initEventListener();
 
@@ -128,14 +137,14 @@ export default class Page {
     }
 
     onDateSelect = async (event) => {
-        this.columnChartOrders.loadData(event.detail.from, event.detail.to);
-        this.columnChartSales.loadData(event.detail.from, event.detail.to);
-        this.columnChartCustomers.loadData(event.detail.from, event.detail.to);
+        this.components.ordersChart.update(event.detail.from, event.detail.to);
+        this.components.salesChart.update(event.detail.from, event.detail.to);
+        this.components.customersChart.update(event.detail.from, event.detail.to);
 
-        this.sortableTableBestSellers.url.searchParams.set('from', event.detail.from.toISOString());
-        this.sortableTableBestSellers.url.searchParams.set('to', event.detail.to.toISOString());
-        const data = await this.sortableTableBestSellers.loadData(this.sortableTableBestSellers.sorted.id, this.sortableTableBestSellers.sorted.order);
-        this.sortableTableBestSellers.renderRows(data);
+        this.components.sortableTable.url.searchParams.set('from', event.detail.from.toISOString());
+        this.components.sortableTable.url.searchParams.set('to', event.detail.to.toISOString());
+        const data = await this.components.sortableTable.loadData(this.components.sortableTable.sorted.id, this.components.sortableTable.sorted.order);
+        this.components.sortableTable.update(data);
     }
 
     remove() {
@@ -147,11 +156,10 @@ export default class Page {
     destroy() {
         this.remove();
         this.element = null;
-        this.rangePicker = null;
-        this.sortableTableBestSellers = null;
-        this.columnChartOrders = null;
-        this.columnChartSales = null;
-        this.columnChartCustomers = null;
+        for (const component of Object.values(this.components)) {
+            component.destroy();
+        }
+        this.components = {};
         this.subElements = {};
     }
 }
